@@ -29,23 +29,34 @@ Scroll adds a floating navigation panel to AI chat interfaces. Jump to any promp
 ### From Chrome Web Store (Coming Soon)
 [Link will be added once published]
 
+### From Firefox Add-ons (Coming Soon)
+[Link will be added once published]
+
 ### From Source
 
-1. Clone this repository:
+First clone this repository:
 ```bash
 git clone https://github.com/asker-kurtelli/scroll.git
 cd scroll
 ```
 
-2. Open Chrome and navigate to `chrome://extensions`
+#### Chrome/Chromium/Edge/Brave
 
-3. Enable **Developer Mode** (toggle in top-right corner)
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable **Developer Mode** (toggle in top-right corner)
+3. Click **Load unpacked** and select the `scroll` folder
+4. Navigate to [ChatGPT](https://chatgpt.com), [Claude](https://claude.ai), or [Gemini](https://gemini.google.com)
+5. Look for the Scroll button on the right side of your screen!
 
-4. Click **Load unpacked** and select the `scroll` folder
+#### Firefox
 
-5. Navigate to [ChatGPT](https://chatgpt.com), [Claude](https://claude.ai), or [Gemini](https://gemini.google.com)
+1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on**
+3. Navigate to the `scroll` folder and select the `manifest.json` file
+4. Navigate to [ChatGPT](https://chatgpt.com), [Claude](https://claude.ai), or [Gemini](https://gemini.google.com)
+5. Look for the Scroll button on the right side of your screen!
 
-6. Look for the Scroll button on the right side of your screen!
+**Note:** Temporary add-ons in Firefox are removed when you close the browser. For permanent installation, you can either install from Firefox Add-ons (when published) or sign the extension yourself.
 
 ## Usage
 
@@ -53,7 +64,7 @@ cd scroll
 
 - **Open/Close**: Click the Scroll button or press `Cmd+;` (Mac) / `Ctrl+;` (Windows/Linux)
 - **Jump to Message**: Click any item in the navigation panel
-- **Navigate by Keyboard**: 
+- **Navigate by Keyboard**:
   - `↓` or `j` - Move down
   - `↑` or `k` - Move up
   - `Enter` - Jump to selected item
@@ -70,15 +81,15 @@ cd scroll
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut       | Action                  |
+|----------------|-------------------------|
 | `Cmd/Ctrl + ;` | Toggle navigation panel |
-| `↓` or `j` | Navigate down |
-| `↑` or `k` | Navigate up |
-| `Enter` | Jump to selected item |
-| `←` | Prompts only view |
-| `→` | All messages view |
-| `Esc` | Close panel |
+| `↓` or `j`     | Navigate down           |
+| `↑` or `k`     | Navigate up             |
+| `Enter`        | Jump to selected item   |
+| `←`            | Prompts only view       |
+| `→`            | All messages view       |
+| `Esc`          | Close panel             |
 
 ## Privacy
 
@@ -92,10 +103,10 @@ Scroll runs **entirely in your browser**. No data is collected, stored, or trans
 - [x] Keyboard shortcuts
 - [x] Search and filter
 - [x] Heading navigation
+- [x] Firefox support
 - [ ] Pin favorite responses
 - [ ] Export conversations
 - [ ] Custom themes
-- [ ] Firefox support
 - [ ] Markdown export
 - [ ] Conversation bookmarks
 
@@ -140,9 +151,9 @@ I believe AI tools should work better for serious work. Open sourcing Scroll mea
 ## Browser Support
 
 - ✅ Chrome/Chromium (tested)
+- ✅ Firefox (supported)
 - ⏳ Edge (needs testing)
 - ⏳ Brave (needs testing)
-- ⏳ Firefox (coming soon)
 - ⏳ Safari (investigating)
 
 ## License
