@@ -37,15 +37,33 @@ git clone https://github.com/asker-kurtelli/scroll.git
 cd scroll
 ```
 
-2. Open Chrome and navigate to `chrome://extensions`
+2. For Chrome:
+   - Open Chrome and navigate to `chrome://extensions`
+   - Enable **Developer Mode** (toggle in top-right corner)
+   - Click **Load unpacked** and select the `scroll` folder
 
-3. Enable **Developer Mode** (toggle in top-right corner)
+3. For Firefox:
+   - Run the build script to prepare for Firefox:
+   ```bash
+   ./build.sh firefox
+   ```
+   - Open Firefox and navigate to `about:debugging`
+   - Click "This Firefox"
+   - Click "Load Temporary Add-on"
+   - Select the manifest.json file from the extension directory
 
-4. Click **Load unpacked** and select the `scroll` folder
+4. Navigate to [ChatGPT](https://chatgpt.com), [Claude](https://claude.ai), or [Gemini](https://gemini.google.com)
 
-5. Navigate to [ChatGPT](https://chatgpt.com), [Claude](https://claude.ai), or [Gemini](https://gemini.google.com)
+5. Look for the Scroll button on the right side of your screen!
 
-6. Look for the Scroll button on the right side of your screen!
+### Building for Different Browsers
+
+The extension uses a simple build system to support both Chrome and Firefox:
+
+- To build for Chrome: `./build.sh chrome`
+- To build for Firefox: `./build.sh firefox`
+
+For more details, see [BUILDING.md](BUILDING.md).
 
 ## Usage
 
@@ -95,7 +113,7 @@ Scroll runs **entirely in your browser**. No data is collected, stored, or trans
 - [ ] Pin favorite responses
 - [ ] Export conversations
 - [ ] Custom themes
-- [ ] Firefox support
+- [x] Firefox support (in progress)
 - [ ] Markdown export
 - [ ] Conversation bookmarks
 
@@ -142,7 +160,7 @@ I believe AI tools should work better for serious work. Open sourcing Scroll mea
 - ✅ Chrome/Chromium (tested)
 - ⏳ Edge (needs testing)
 - ⏳ Brave (needs testing)
-- ⏳ Firefox (coming soon)
+- ✅ Firefox (in progress)
 - ⏳ Safari (investigating)
 
 ## License
