@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Scroll",
+  "version": "1.1.0",
+  "description": "Navigate long conversations on Claude, ChatGPT, and Gemini",
+  "permissions": [
+    "activeTab",
+    "https://claude.ai/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://gemini.google.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "scroll@extension",
+      "strict_min_version": "58.0"
+    }
+  }
+}
