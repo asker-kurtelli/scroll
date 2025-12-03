@@ -12,7 +12,7 @@
         const assistantSelectors = [
           '.font-claude-response',
           '[data-testid="assistant-response"]',
-          '[data-testid="assistant-message"]'  
+          '[data-testid="assistant-message"]'
         ].join(', ');
         const selector = `[data-testid="user-message"], ${assistantSelectors}`;
         const seen = new Set();
@@ -26,24 +26,24 @@
           seen.add(el);
           return true;
         });
-        
+
         allItems.forEach(el => {
-           const isUser = el.getAttribute('data-testid') === 'user-message';
-           const turnContainer = el.closest('[data-testid="conversation-turn"]') || el.closest('.group') || el.parentElement;
-           
-           let headings = [];
-           if (!isUser) {
-              headings = Array.from(el.querySelectorAll('h1, h2, h3, h4')).map(h => ({
-                 innerText: h.innerText, element: h, tagName: h.tagName
-              }));
-           }
-           
-           turns.push({
-              role: isUser ? 'user' : 'assistant',
-              element: turnContainer,
-              text: el.innerText || '', 
-              headings: headings
-           });
+          const isUser = el.getAttribute('data-testid') === 'user-message';
+          const turnContainer = el.closest('[data-testid="conversation-turn"]') || el.closest('.group') || el.parentElement;
+
+          let headings = [];
+          if (!isUser) {
+            headings = Array.from(el.querySelectorAll('h1, h2, h3, h4')).map(h => ({
+              innerText: h.innerText, element: h, tagName: h.tagName
+            }));
+          }
+
+          turns.push({
+            role: isUser ? 'user' : 'assistant',
+            element: turnContainer,
+            text: el.innerText || '',
+            headings: headings
+          });
         });
         return turns;
       }
@@ -57,18 +57,18 @@
           const role = article.dataset.turn;
           let text = '';
           let headings = [];
-          
+
           if (role === 'user') {
-             const textEl = article.querySelector('[data-message-author-role="user"]');
-             text = textEl ? textEl.innerText : '';
+            const textEl = article.querySelector('[data-message-author-role="user"]');
+            text = textEl ? textEl.innerText : '';
           } else {
-             const contentEl = article.querySelector('[data-message-author-role="assistant"]');
-             if (contentEl) {
-               text = contentEl.innerText || '';
-               headings = Array.from(contentEl.querySelectorAll('h1, h2, h3, h4')).map(h => ({
-                 innerText: h.innerText, element: h, tagName: h.tagName
-               }));
-             }
+            const contentEl = article.querySelector('[data-message-author-role="assistant"]');
+            if (contentEl) {
+              text = contentEl.innerText || '';
+              headings = Array.from(contentEl.querySelectorAll('h1, h2, h3, h4')).map(h => ({
+                innerText: h.innerText, element: h, tagName: h.tagName
+              }));
+            }
           }
           return { role, element: article, text, headings };
         });
@@ -81,29 +81,29 @@
         const turns = [];
         const items = Array.from(container.querySelectorAll('user-query, model-response'));
         items.forEach(item => {
-           const isUser = item.tagName.toLowerCase() === 'user-query';
-           let text = '';
-           let headings = [];
-           
-           if (isUser) {
-              const textEl = item.querySelector('.query-text');
-              text = textEl ? textEl.innerText : '';
-           } else {
-              const markdown = item.querySelector('.markdown');
-              if (markdown) {
-                 text = markdown.innerText || '';
-                 headings = Array.from(markdown.querySelectorAll('h1, h2, h3, h4')).map(h => ({
-                   innerText: h.innerText, element: h, tagName: h.tagName
-                 }));
-              }
-           }
-           
-           turns.push({ 
-              role: isUser ? 'user' : 'assistant', 
-              element: item, 
-              text: text, 
-              headings: headings 
-           });
+          const isUser = item.tagName.toLowerCase() === 'user-query';
+          let text = '';
+          let headings = [];
+
+          if (isUser) {
+            const textEl = item.querySelector('.query-text');
+            text = textEl ? textEl.innerText : '';
+          } else {
+            const markdown = item.querySelector('.markdown');
+            if (markdown) {
+              text = markdown.innerText || '';
+              headings = Array.from(markdown.querySelectorAll('h1, h2, h3, h4')).map(h => ({
+                innerText: h.innerText, element: h, tagName: h.tagName
+              }));
+            }
+          }
+
+          turns.push({
+            role: isUser ? 'user' : 'assistant',
+            element: item,
+            text: text,
+            headings: headings
+          });
         });
         return turns;
       }
@@ -114,7 +114,7 @@
   const state = {
     isOpen: false,
     currentProvider: null,
-    searchTerm: '', 
+    searchTerm: '',
     viewLevel: 2, // 1 = Prompts Only, 2 = All
     navTargets: new Map(),
     navItems: new Map(),
@@ -127,7 +127,14 @@
     conversationObserver: null,
     bodyObserver: null,
     suppressNavAutoScroll: false,
-    navAutoScrollTimeout: null
+
+    navAutoScrollTimeout: null,
+    // Drag State
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    initialLeft: 0,
+    initialTop: 0
   };
 
   // --- Initialization ---
@@ -148,15 +155,18 @@
     createUI();
     applyTheme();
     observeForContainerChanges();
-    
+
     const container = findConversationContainer();
     if (container) setConversationContainer(container);
-    
+
+    restorePosition();
     refreshNavigation();
   }
 
   // --- UI Creation ---
   function createUI() {
+    if (document.getElementById('scroll-nav-root')) return; // Idempotency check
+
     const root = document.createElement('div');
     root.className = 'scroll-nav-root';
     root.id = 'scroll-nav-root';
@@ -168,13 +178,16 @@
     toggleBtn.innerHTML = `
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
     `;
-    
+
     const panel = document.createElement('div');
     panel.className = 'scroll-nav-panel';
-    
+
     // HEADER STRUCTURE: Single Line
     panel.innerHTML = `
       <div class="scroll-nav-header">
+        <div class="scroll-drag-handle" id="scroll-drag-handle" title="Drag to move">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+        </div>
         <span class="scroll-nav-progress" id="scroll-progress">0%</span>
         
         <div class="scroll-view-toggle">
@@ -200,7 +213,7 @@
     document.body.appendChild(root);
 
     toggleBtn.addEventListener('click', () => toggleNav());
-    
+
     // Search Listeners
     const searchInput = root.querySelector('#scroll-search-input');
     searchInput.addEventListener('input', (e) => {
@@ -220,52 +233,232 @@
     // Toggle View Listeners
     const viewBtns = panel.querySelectorAll('.scroll-view-btn');
     viewBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const level = parseInt(btn.dataset.level);
-            setViewLevel(level);
-        });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const level = parseInt(btn.dataset.level);
+        setViewLevel(level);
+      });
     });
 
     // Keyboard Shortcuts (Cmd + . or Cmd + ;)
     document.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && (e.key === '.' || e.key === ';')) {
-            e.preventDefault();
-            toggleNav();
-            return;
-        }
-        if (!state.isOpen) return;
+      if ((e.metaKey || e.ctrlKey) && (e.key === '.' || e.key === ';')) {
+        e.preventDefault();
+        toggleNav();
+        return;
+      }
+      if (!state.isOpen) return;
 
-        if (e.key === 'Escape') {
-            toggleNav(false);
-            return;
-        }
+      if (e.key === 'Escape') {
+        toggleNav(false);
+        return;
+      }
 
-        const activeEl = document.activeElement;
-        const typingContext = activeEl && (
-          activeEl.tagName === 'INPUT' ||
-          activeEl.tagName === 'TEXTAREA' ||
-          activeEl.isContentEditable
-        );
-        if (typingContext) return;
+      const activeEl = document.activeElement;
+      const typingContext = activeEl && (
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.isContentEditable
+      );
+      if (typingContext) return;
 
-        if (e.key === 'ArrowDown' || e.key === 'j') {
-            e.preventDefault();
-            moveFocus(1);
-        } else if (e.key === 'ArrowUp' || e.key === 'k') {
-            e.preventDefault();
-            moveFocus(-1);
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            activateFocusedItem();
-        } else if (e.key === 'ArrowLeft') { 
-            e.preventDefault();
-            setViewLevel(1); // Set to "Prompts"
-        } else if (e.key === 'ArrowRight') { 
-            e.preventDefault();
-            setViewLevel(2); // Set to "All"
-        }
+      if (e.key === 'ArrowDown' || e.key === 'j') {
+        e.preventDefault();
+        moveFocus(1);
+      } else if (e.key === 'ArrowUp' || e.key === 'k') {
+        e.preventDefault();
+        moveFocus(-1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        activateFocusedItem();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setViewLevel(1); // Set to "Prompts"
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setViewLevel(2); // Set to "All"
+      }
     });
+
+
+    // Drag Listeners
+    const dragHandle = panel.querySelector('#scroll-drag-handle');
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown', initDrag);
+      dragHandle.addEventListener('dblclick', resetPosition); // Reset on double click
+    }
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    window.addEventListener('resize', debounce(onWindowResize, 200));
+  }
+
+  function onWindowResize() {
+    const root = document.getElementById('scroll-nav-root');
+    if (!root) return;
+
+    // Only clamp if we have custom positioning (inline styles set)
+    if (!root.style.left && !root.style.top) return;
+
+    const rect = root.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    let newLeft = rect.left;
+    let newTop = rect.top;
+    let clamped = false;
+
+    if (newLeft + rect.width > viewportWidth - 10) {
+      newLeft = viewportWidth - rect.width - 10;
+      clamped = true;
+    }
+    if (newTop + rect.height > viewportHeight - 10) {
+      newTop = viewportHeight - rect.height - 10;
+      clamped = true;
+    }
+
+    // Also check left/top edges
+    if (newLeft < 10) { newLeft = 10; clamped = true; }
+    if (newTop < 10) { newTop = 10; clamped = true; }
+
+    if (clamped) {
+      root.style.left = `${newLeft}px`;
+      root.style.top = `${newTop}px`;
+      savePosition();
+    }
+  }
+
+  // --- Drag & Drop Logic (Optimized) ---
+  function initDrag(e) {
+    if (e.button !== 0) return;
+    const root = document.getElementById('scroll-nav-root');
+    state.isDragging = true;
+    state.dragStartX = e.clientX;
+    state.dragStartY = e.clientY;
+
+    // Get current computed position
+    const rect = root.getBoundingClientRect();
+    state.initialLeft = rect.left;
+    state.initialTop = rect.top;
+
+    root.classList.add('is-dragging');
+    root.style.transition = 'none';
+    document.body.style.userSelect = 'none';
+  }
+
+  function onDrag(e) {
+    if (!state.isDragging) return;
+
+    // Calculate delta
+    const dx = e.clientX - state.dragStartX;
+    const dy = e.clientY - state.dragStartY;
+
+    // Use transform for performance (GPU)
+    const root = document.getElementById('scroll-nav-root');
+    root.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+  }
+
+  function stopDrag(e) {
+    if (!state.isDragging) return;
+    state.isDragging = false;
+    document.body.style.userSelect = '';
+
+    const root = document.getElementById('scroll-nav-root');
+    root.classList.remove('is-dragging');
+    root.style.transition = '';
+
+    // Calculate final position
+    const dx = e.clientX - state.dragStartX;
+    const dy = e.clientY - state.dragStartY;
+
+    let newLeft = state.initialLeft + dx;
+    let newTop = state.initialTop + dy;
+
+    // Boundary checks
+    const width = root.offsetWidth;
+    const height = root.offsetHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    if (newLeft < 10) newLeft = 10;
+    if (newLeft + width > viewportWidth - 10) newLeft = viewportWidth - width - 10;
+    if (newTop < 10) newTop = 10;
+    if (newTop + height > viewportHeight - 10) newTop = viewportHeight - height - 10;
+
+    // Commit position
+    root.style.transform = 'none';
+    root.style.left = `${newLeft}px`;
+    root.style.top = `${newTop}px`;
+    root.style.right = 'auto';
+    root.style.bottom = 'auto';
+
+    savePosition();
+  }
+
+  function resetPosition() {
+    const root = document.getElementById('scroll-nav-root');
+    if (!root) return;
+
+    // Reset styles to CSS defaults
+    root.style.top = '';
+    root.style.left = '';
+    root.style.right = '';
+    root.style.bottom = '';
+    root.style.transform = '';
+
+    const host = window.location.hostname;
+    const key = `scroll_nav_pos_${host}`;
+
+    try {
+      chrome.storage.local.remove(key, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('Scroll Nav: Failed to reset position', chrome.runtime.lastError);
+        }
+      });
+    } catch (err) {
+      console.warn('Scroll Nav: Storage error', err);
+    }
+  }
+
+  function savePosition() {
+    const root = document.getElementById('scroll-nav-root');
+    const rect = root.getBoundingClientRect();
+    const pos = { top: rect.top, left: rect.left };
+    const host = window.location.hostname;
+
+    const key = `scroll_nav_pos_${host}`;
+    try {
+      chrome.storage.local.set({ [key]: pos }, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('Scroll Nav: Failed to save position', chrome.runtime.lastError);
+        }
+      });
+    } catch (err) {
+      console.warn('Scroll Nav: Storage error', err);
+    }
+  }
+
+  function restorePosition() {
+    const host = window.location.hostname;
+    const key = `scroll_nav_pos_${host}`;
+
+    try {
+      chrome.storage.local.get([key], (result) => {
+        if (chrome.runtime.lastError) {
+          console.warn('Scroll Nav: Failed to load position', chrome.runtime.lastError);
+          return;
+        }
+        const pos = result[key];
+        if (pos) {
+          const root = document.getElementById('scroll-nav-root');
+          if (root) {
+            root.style.top = `${pos.top}px`;
+            root.style.left = `${pos.left}px`;
+            root.style.right = 'auto';
+          }
+        }
+      });
+    } catch (err) {
+      console.warn('Scroll Nav: Storage error', err);
+    }
   }
 
   function toggleNav(forceState) {
@@ -273,18 +466,18 @@
     const newState = forceState !== undefined ? forceState : !state.isOpen;
     state.isOpen = newState;
     root.classList.toggle('scroll-nav-open', newState);
-    
+
     if (newState) {
-        const activeIndex = state.focusableIds.indexOf(state.activeNavId);
-        if (activeIndex >= 0) {
-          state.focusedIndex = activeIndex;
-        } else if (state.focusableIds.length > 0) {
-          state.focusedIndex = 0;
-        } else {
-          state.focusedIndex = -1;
-        }
-    } else {
+      const activeIndex = state.focusableIds.indexOf(state.activeNavId);
+      if (activeIndex >= 0) {
+        state.focusedIndex = activeIndex;
+      } else if (state.focusableIds.length > 0) {
+        state.focusedIndex = 0;
+      } else {
         state.focusedIndex = -1;
+      }
+    } else {
+      state.focusedIndex = -1;
     }
     updateFocusVisuals();
   }
@@ -302,13 +495,13 @@
     if (state.viewLevel === level) return; // Don't re-render if no change
     const root = document.getElementById('scroll-nav-root');
     if (!root) return;
-    
+
     const viewBtns = root.querySelectorAll('.scroll-view-btn');
     viewBtns.forEach(b => {
-        const btnLevel = parseInt(b.dataset.level);
-        b.classList.toggle('active', btnLevel === level);
+      const btnLevel = parseInt(b.dataset.level);
+      b.classList.toggle('active', btnLevel === level);
     });
-    
+
     state.viewLevel = level;
     refreshNavigation();
   }
@@ -320,7 +513,7 @@
 
     let turns = state.currentProvider.getTurns(state.scrollContainer);
     updateScrollTargetFromTurns(turns);
-    
+
     turns.sort((a, b) => (a.element.compareDocumentPosition(b.element) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
 
     state.navTargets.clear();
@@ -333,7 +526,7 @@
 
     turns.forEach((turn, index) => {
       const isUser = turn.role === 'user';
-      
+
       // --- VIEW LEVEL LOGIC ---
       if (state.viewLevel === 1 && !isUser) return;
 
@@ -342,7 +535,7 @@
       const term = state.searchTerm.trim();
       const promptMatch = term === '' || rawText.includes(term);
       const matchingHeadings = turn.headings.filter(h => term === '' || h.innerText.toLowerCase().includes(term));
-      
+
       if (!promptMatch && matchingHeadings.length === 0) return;
       hasVisibleItems = true;
 
@@ -353,33 +546,33 @@
 
       // 1. Icon Logic
       const userIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
-      const aiIcon   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>`;
-      
+      const aiIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>`;
+
       const iconSpan = document.createElement('span');
       iconSpan.className = 'scroll-nav-icon';
       iconSpan.innerHTML = isUser ? userIcon : aiIcon;
-      li.appendChild(iconSpan); 
+      li.appendChild(iconSpan);
 
       // 2. Text Logic
       const textSpan = document.createElement('span');
       textSpan.className = 'scroll-nav-text';
-      
+
       let displayText = cleanText(turn.text);
       if (state.searchTerm && rawText.includes(term)) {
-          const idx = rawText.indexOf(term);
-          const start = Math.max(0, idx - 10);
-          const end = Math.min(rawText.length, idx + 30);
-          displayText = "..." + rawText.substring(start, end) + "...";
+        const idx = rawText.indexOf(term);
+        const start = Math.max(0, idx - 10);
+        const end = Math.min(rawText.length, idx + 30);
+        displayText = "..." + rawText.substring(start, end) + "...";
       }
       textSpan.textContent = displayText;
-      li.appendChild(textSpan);   
+      li.appendChild(textSpan);
 
       // 3. Wiring
       const targetId = `nav-target-${index}`;
       state.navTargets.set(targetId, turn.element);
       state.navItems.set(targetId, li);
       focusOrder.push(targetId);
-      
+
       li.addEventListener('click', (e) => {
         e.stopPropagation();
         scrollToElement(turn.element, targetId);
@@ -388,34 +581,34 @@
       li.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         navigator.clipboard.writeText(turn.text).then(() => {
-            const originalText = textSpan.textContent;
-            textSpan.textContent = "Copied to clipboard!";
-            textSpan.style.color = "var(--theme-accent)";
-            setTimeout(() => {
-                textSpan.textContent = originalText;
-                textSpan.style.color = "";
-            }, 1200);
+          const originalText = textSpan.textContent;
+          textSpan.textContent = "Copied to clipboard!";
+          textSpan.style.color = "var(--theme-accent)";
+          setTimeout(() => {
+            textSpan.textContent = originalText;
+            textSpan.style.color = "";
+          }, 1200);
         });
       });
 
       // 4. Headings (Sub-list)
       const showSubHeadings = (state.viewLevel === 2 || state.searchTerm.length > 0);
       const headingsToShow = state.searchTerm ? matchingHeadings : turn.headings;
-      
+
       if (showSubHeadings && headingsToShow.length > 0) {
         const subList = document.createElement('ul');
         subList.className = 'scroll-nav-sublist';
-        
+
         headingsToShow.forEach((h, hIndex) => {
           const subLi = document.createElement('li');
           subLi.className = 'scroll-nav-subitem';
           subLi.textContent = h.innerText;
-          
+
           const hId = `${targetId}-h-${hIndex}`;
           state.navTargets.set(hId, h.element);
           state.navItems.set(hId, subLi);
           focusOrder.push(hId);
-          
+
           subLi.addEventListener('click', (e) => {
             e.stopPropagation();
             scrollToElement(h.element, hId);
@@ -439,7 +632,7 @@
       state.focusedIndex = focusOrder.length - 1;
     }
     updateFocusVisuals();
-    
+
     // Trigger update to show current position immediately
     if (!state.searchTerm) setTimeout(updateScrollProgress, 100);
   }
@@ -535,8 +728,8 @@
   }
 
   function updateScrollProgress() {
-    if (!state.scrollContainer) return; 
-    
+    if (!state.scrollContainer) return;
+
     const scrollSource = getScrollSourceNode();
     if (!scrollSource) return;
 
@@ -558,29 +751,29 @@
     if (label) label.textContent = `${pct}%`;
 
     if (state.suppressNavAutoScroll) return;
-    
-    const headerOffset = getScrollOffset(); 
+
+    const headerOffset = getScrollOffset();
     const viewLine = state.scrollContainer.getBoundingClientRect().top + headerOffset;
     let closestId = null;
     let minDist = Infinity;
 
     for (const [id, el] of state.navTargets) {
-       if (!el.isConnected) continue;
-       const rect = el.getBoundingClientRect();
-       const dist = Math.abs(rect.top - viewLine);
-       if (dist < minDist) {
-         minDist = dist;
-         closestId = id;
-       }
+      if (!el.isConnected) continue;
+      const rect = el.getBoundingClientRect();
+      const dist = Math.abs(rect.top - viewLine);
+      if (dist < minDist) {
+        minDist = dist;
+        closestId = id;
+      }
     }
     if (closestId) setActiveItem(closestId);
   }
 
   function findConversationContainer() {
     if (!state.currentProvider) return null;
-    return document.querySelector(state.currentProvider.scrollContainerSelector) || 
-           document.querySelector('main') || 
-           document.body;
+    return document.querySelector(state.currentProvider.scrollContainerSelector) ||
+      document.querySelector('main') ||
+      document.body;
   }
 
   function setConversationContainer(node) {
@@ -597,7 +790,7 @@
   function setScrollEventTarget(target) {
     const metricsTarget = target || null;
     const listenerTarget = (metricsTarget === document.body || metricsTarget === document.documentElement) ? window : metricsTarget;
-    
+
     if (state.scrollEventTarget === metricsTarget && state.scrollListenerTarget === listenerTarget) return;
 
     if (state.scrollListenerTarget) {
@@ -682,11 +875,11 @@
   }
 
   function onScroll() {
-     if (state.scrollAnimationFrame) return;
-     state.scrollAnimationFrame = requestAnimationFrame(() => {
-       updateScrollProgress();
-       state.scrollAnimationFrame = null;
-     });
+    if (state.scrollAnimationFrame) return;
+    state.scrollAnimationFrame = requestAnimationFrame(() => {
+      updateScrollProgress();
+      state.scrollAnimationFrame = null;
+    });
   }
 
   function debounce(fn, ms) {
