@@ -7,10 +7,6 @@
 </p>
 
 <p align="center">
-  <a href="https://www.producthunt.com/products/scroll-5?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-scroll&#0045;4" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1044964&theme=dark&t=1764696371083" alt="Scroll - Better&#0032;navigation&#0032;for&#0032;ChatGPT&#0044;&#0032;Claude&#0044;&#0032;&#0043;&#0032;Gemini | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-</p>
-
-<p align="center">
   <a href="https://chromewebstore.google.com/detail/scroll/mpcklmodkihbiblhffoganikkdfoaphe">
     <img src="https://img.shields.io/badge/Chrome_Web_Store-Install_Now-brightgreen?logo=google-chrome&logoColor=white" alt="Chrome Web Store">
   </a>
