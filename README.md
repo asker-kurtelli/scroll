@@ -66,6 +66,8 @@ No data leaves your browser. No account required. No permissions beyond content 
 
 ## What's next
 
+Scroll helps you navigate within chats. Soon you'll search across all of them.
+
 <p align="center">
   <img src="assets/whats-next.png" alt="Scroll command palette preview" width="600">
 </p>
