@@ -1,0 +1,48 @@
+{
+  "name": "scroll-pro",
+  "version": "2.1.0",
+  "description": "Navigate, copy, and export your AI chats.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:firefox": "vite build && node scripts/build-firefox.mjs",
+    "build:all": "vite build && node scripts/build-firefox.mjs",
+    "firefox:run": "web-ext run -s dist-firefox",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asker-kurtelli/scroll.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asker-kurtelli/scroll/issues"
+  },
+  "homepage": "https://github.com/asker-kurtelli/scroll#readme",
+  "dependencies": {
+    "@crxjs/vite-plugin": "^2.2.1",
+    "@types/marked": "^5.0.2",
+    "dompurify": "^3.3.1",
+    "marked": "^17.0.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/chrome": "^0.1.31",
+    "@types/dompurify": "^3.0.5",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
+    "web-ext": "^9.3.0"
+  }
+}

@@ -1,0 +1,486 @@
+/* --------------------------------------------------------- */
+/* 1. Variables                                              */
+/* --------------------------------------------------------- */
+:root {
+  --ease-slide: cubic-bezier(0.165, 0.84, 0.44, 1); 
+  
+  /* Dimensions */
+  --nav-width: 280px; 
+  --spine-center: 26px;
+  
+  /* Default Theme */
+  --font-ui: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  
+  /* Glass Surface */
+  --bg-glass: rgba(255, 255, 255, 0.95); 
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --shadow-glass: 0 8px 32px -8px rgba(0, 0, 0, 0.08), 0 2px 8px -4px rgba(0,0,0,0.04);
+  
+  /* Ink */
+  --ink: #171717;       
+  --muted: #737373;     
+  --muted-light: #e5e5e5; 
+  --surface-hover: rgba(0, 0, 0, 0.04);
+  --surface-active: rgba(0, 0, 0, 0.08);
+  
+  /* Accent falls back to black */
+  --theme-accent: #171717; 
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-glass: rgba(20, 20, 20, 0.90);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --shadow-glass: 0 16px 48px -12px rgba(0, 0, 0, 0.5);
+    
+    --ink: #ededed;
+    --muted: #888888;
+    --muted-light: #333333;
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --surface-active: rgba(255, 255, 255, 0.12);
+    
+    --theme-accent: #fff;
+  }
+}
+
+/* Host Adaptations */
+.theme-claude { --font-family: "Tiémpos Text", "Iowan Old Style", serif; --theme-accent: #da7756; }
+.theme-chatgpt { --font-family: "Söhne", "Segoe UI", sans-serif; --theme-accent: #10a37f; }
+.theme-gemini { --font-family: "Google Sans", "Roboto", sans-serif; --theme-accent: #4285f4; }
+
+/* --------------------------------------------------------- */
+/* 2. Structural Container                                   */
+/* --------------------------------------------------------- */
+.scroll-nav-root {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 9999;
+  font-family: var(--font-ui);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* The Main Panel */
+.scroll-nav-panel {
+  pointer-events: none;
+  width: var(--nav-width);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  
+  /* Visuals */
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: 12px;
+
+  /* Prevent Horizontal Scroll */
+  overflow-x: hidden; 
+
+  /* ANIMATION STATE: CLOSED (Slide Effect) */
+  opacity: 0;
+  transform: translateX(20px); 
+  visibility: hidden;
+  
+  transition: 
+    opacity 0.2s ease,
+    transform 0.3s var(--ease-slide),
+    visibility 0s linear 0.3s;
+}
+
+.scroll-nav-open .scroll-nav-panel {
+  /* ANIMATION STATE: OPEN */
+  opacity: 1;
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  
+  transition: 
+    opacity 0.2s ease,
+    transform 0.3s var(--ease-slide),
+    visibility 0s linear 0s;
+}
+
+/* --------------------------------------------------------- */
+/* 3. Header (Single Line Layout)                            */
+/* --------------------------------------------------------- */
+.scroll-nav-header {
+  padding: 12px 16px 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-shrink: 0;
+  height: auto;
+  min-height: 32px;
+  margin-bottom: 4px;
+}
+
+/* Left Side: Title */
+.scroll-nav-title {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--muted);
+  margin-right: auto;
+}
+
+/* Middle: View Toggles */
+.scroll-view-toggle {
+  display: flex;
+  background: var(--surface-hover);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 0;
+  margin-left: auto;
+}
+
+.scroll-view-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scroll-view-btn:hover {
+  color: var(--ink);
+}
+
+.scroll-view-btn.active {
+  background: var(--bg-glass);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  font-weight: 600;
+}
+
+/* Right Side: Progress */
+.scroll-nav-progress {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-accent);
+  font-feature-settings: "tnum";
+  min-width: 30px;
+  text-align: left;
+}
+
+/* Search Bar */
+.scroll-search-container {
+  padding: 0 16px 8px 16px;
+  border-bottom: 1px solid var(--border-glass);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.scroll-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.scroll-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 32px;
+  background: var(--surface-hover);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0 8px 0 32px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.scroll-search-input:focus {
+  background: var(--bg-glass);
+  border-color: var(--border-glass);
+  box-shadow: 0 0 0 2px var(--surface-hover);
+}
+
+.scroll-search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------- */
+/* 4. List & Timeline Spine                                  */
+/* --------------------------------------------------------- */
+.scroll-nav-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden; 
+  padding: 12px 0;
+  position: relative;
+  scrollbar-width: thin;
+}
+
+.scroll-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+/* The Continuous Vertical Spine */
+.scroll-nav-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--spine-center); 
+  width: 1px;
+  background: var(--border-glass); 
+  z-index: 0;
+}
+
+/* --------------------------------------------------------- */
+/* 5. Items (Flex Layout)                                    */
+/* --------------------------------------------------------- */
+.scroll-nav-item {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap; 
+  align-items: center;
+  
+  padding: 6px 12px 6px 0;
+  margin-bottom: 2px;
+  cursor: pointer;
+  
+  border-left: 3px solid transparent; 
+  transition: background 0.1s ease;
+  z-index: 1; 
+  
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.scroll-nav-item:hover {
+  background: var(--surface-hover);
+}
+
+.scroll-nav-item.scroll-nav-focused {
+    background: var(--surface-hover);
+    border-left-color: var(--theme-accent);
+}
+
+.scroll-nav-subitem.scroll-nav-focused {
+    background: var(--surface-hover);
+    color: var(--theme-accent);      
+    font-weight: 500;                
+    opacity: 1;                      
+}
+
+
+
+/* The Icon (User or Hash) */
+.scroll-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  margin-left: calc(var(--spine-center) - 12px); 
+  margin-right: 10px;
+  
+  width: 24px; 
+  height: 24px; 
+  flex-shrink: 0;
+  
+  background: var(--bg-glass); 
+  border-radius: 6px;
+  
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+/* The Text Label */
+.scroll-nav-text {
+  flex: 1; 
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0; 
+  padding-right: 4px;
+}
+
+/* Active State */
+.scroll-nav-item.scroll-nav-active {
+  background: var(--surface-hover);
+  border-left-color: var(--theme-accent); 
+}
+
+.scroll-nav-item.scroll-nav-active .scroll-nav-icon {
+  color: var(--theme-accent);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.scroll-nav-item.scroll-nav-active .scroll-nav-text {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------- */
+/* 6. Sub-Items (Headings)                                   */
+/* --------------------------------------------------------- */
+.scroll-nav-sublist {
+  flex-basis: 100%;
+  width: 100%; 
+  box-sizing: border-box; 
+  padding-left: calc(var(--spine-center) + 24px); 
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.scroll-nav-subitem {
+  position: relative;
+  padding: 3px 12px 3px 0; 
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.8;
+  cursor: pointer;
+  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%; 
+  
+  transition: color 0.15s;
+}
+
+.scroll-nav-subitem:hover { color: var(--ink); opacity: 1; }
+.scroll-nav-subitem.scroll-nav-active { color: var(--theme-accent); font-weight: 500; opacity: 1; }
+
+.scroll-nav-star {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--muted);
+  opacity: 0.25;
+  cursor: pointer;
+  transition: opacity 0.15s ease, color 0.2s ease, transform 0.15s ease, border-color 0.15s ease;
+  pointer-events: auto;
+}
+
+.scroll-nav-item:hover .scroll-nav-star {
+  opacity: 1;
+}
+
+.scroll-nav-star:hover {
+  color: var(--ink);
+  border-color: var(--border-glass);
+  transform: scale(1.05);
+}
+
+.scroll-nav-star.saved {
+  opacity: 1;
+  color: #f59e0b;
+  border-color: rgba(0,0,0,0.05);
+}
+
+.scroll-clip-button {
+  position: sticky;
+  top: 6px;
+  float: right;
+  margin-left: 8px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 6px;
+  color: var(--muted);
+  box-shadow: var(--shadow-glass);
+  opacity: 0.7;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, color 0.2s ease;
+}
+
+.scroll-clip-button:hover {
+  opacity: 1;
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.scroll-clip-button.saved {
+  color: #f59e0b;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------- */
+/* 7. Toggle Button )                                        */
+/* --------------------------------------------------------- */
+.scroll-nav-toggle {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-glass);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  z-index: 10000;
+  transition: all 0.2s ease;
+}
+
+.scroll-nav-toggle:hover {
+  color: var(--ink);
+  border-color: var(--muted-light);
+  transform: scale(1.05);
+}
+
+/* Open State: Subtle Elevation/Press instead of Rotation */
+.scroll-nav-open .scroll-nav-toggle {
+  background: var(--surface-hover);
+  border-color: var(--border-glass);
+  color: var(--ink);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  transform: scale(0.96);
+}
+
+.scroll-nav-toggle svg {
+  transition: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .scroll-nav-root { top: auto; bottom: 20px; right: 12px; }
+  .scroll-nav-panel { max-height: 50vh; width: 85vw; }
+}
+
+.scroll-nav-empty-state {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  opacity: 0.8;
+}
