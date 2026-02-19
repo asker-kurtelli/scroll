@@ -1,15 +1,16 @@
 # Scroll
 
-**Navigate, copy, and export your AI chats.**
+**Navigate, copy, and export your AI conversations.**
 
 A browser extension that adds a navigation sidebar to ChatGPT, Claude, and Gemini. Jump to any turn, copy prompts and responses, and export full conversations.
 
+<p align="center">
+  <img src="assets/demo.png" alt="Scroll sidebar" width="800">
+</p>
+
 ## Install
 
-| Browser | Link |
-|---------|------|
-| Chrome / Edge / Brave | [**Add to Chrome**](https://chromewebstore.google.com/detail/scroll/mpcklmodkihbiblhffoganikkdfoaphe) |
-| Firefox | [**Add to Firefox**](https://addons.mozilla.org/en-US/firefox/addon/tryscroll/) |
+[**Add to Chrome**](https://chromewebstore.google.com/detail/scroll/mpcklmodkihbiblhffoganikkdfoaphe) — works on Chrome, Edge, and Brave.
 
 ### From source
 
@@ -65,9 +66,11 @@ No data leaves your browser. No account required. No permissions beyond content 
 
 ## What's next
 
-Scroll helps you navigate within chats. Soon, you'll be able to search across all of them.
+<p align="center">
+  <img src="assets/whats-next.png" alt="Scroll command palette preview" width="600">
+</p>
 
-We're building something new. [Join the waitlist at tryscroll.app](https://tryscroll.app) for early access.
+[Get early access at tryscroll.app](https://tryscroll.app)
 
 ## Contributing
 
