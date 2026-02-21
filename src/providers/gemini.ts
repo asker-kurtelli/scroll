@@ -17,10 +17,16 @@ export const gemini: Provider = {
             let headings: any[] = [];
 
             if (isUser) {
+                // User query text is in div.query-text, but it contains a
+                // screen-reader-only "You said" span (.cdk-visually-hidden).
+                // Clone the node and strip hidden elements before serializing.
                 const queryContainer = item.querySelector('div.query-text');
                 if (queryContainer) {
-                    text = serializeNodeToMarkdown(queryContainer);
-                } else {
+                    const clone = queryContainer.cloneNode(true) as HTMLElement;
+                    clone.querySelectorAll('.cdk-visually-hidden').forEach(el => el.remove());
+                    text = serializeNodeToMarkdown(clone);
+                }
+                if (!text) {
                     const queryLines = Array.from(item.querySelectorAll('div.query-text p.query-text-line'));
                     text = queryLines
                         .map(p => (p as HTMLElement).textContent?.trim() || '')
@@ -51,7 +57,8 @@ export const gemini: Provider = {
         return turns;
     },
     getChatTitle: () => {
-        const titleEl = document.querySelector('.conversation-title');
+        const titleEl = document.querySelector('[data-test-id="conversation-title"]')
+            || document.querySelector('.conversation-title');
         return titleEl?.textContent?.trim() || null;
     }
 };

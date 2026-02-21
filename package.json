@@ -10,7 +10,8 @@
     "build:all": "vite build && node scripts/build-firefox.mjs",
     "firefox:run": "web-ext run -s dist-firefox",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "package": "npm run build:all && cd dist && zip -r ../scroll-chrome.zip . && cd ../dist-firefox && zip -r ../scroll-firefox.zip ."
   },
   "repository": {
     "type": "git",

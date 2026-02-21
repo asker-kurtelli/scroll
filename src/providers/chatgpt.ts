@@ -26,8 +26,17 @@ export const chatgpt: Provider = {
 
             if (role === 'user') {
                 const textEl = article.querySelector('[data-message-author-role="user"]');
-                text = textEl ? serializeNodeToMarkdown(textEl) : '';
-                if (!text && textEl) text = (textEl as HTMLElement).innerText;
+                if (textEl) {
+                    // Prefer the text bubble only, excluding file attachment tiles
+                    const textBubble = textEl.querySelector('.whitespace-pre-wrap');
+                    if (textBubble) {
+                        text = serializeNodeToMarkdown(textBubble as HTMLElement) || (textBubble as HTMLElement).innerText || '';
+                    }
+                    // Fallback to full content for file-only messages
+                    if (!text) {
+                        text = serializeNodeToMarkdown(textEl) || (textEl as HTMLElement).innerText || '';
+                    }
+                }
             } else {
                 const contentEl = article.querySelector('[data-message-author-role="assistant"]');
                 if (contentEl) {

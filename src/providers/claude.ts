@@ -1,6 +1,18 @@
 import { Provider, Turn } from '../types';
 import { serializeNodeToMarkdown } from '../lib/markdownUtil';
 
+/**
+ * Claude renders thinking/reasoning blocks in a 2-row grid:
+ *   .row-start-1 = collapsible thinking content
+ *   .row-start-2 = actual response
+ * Returns the response-only element when a thinking block is present,
+ * or the original element otherwise.
+ */
+const getResponseContent = (el: HTMLElement): HTMLElement => {
+    const responseRow = el.querySelector('.row-start-2');
+    return (responseRow as HTMLElement) || el;
+};
+
 export const claude: Provider = {
     name: 'claude',
     isMatch: () => window.location.hostname.includes('claude'),
@@ -107,9 +119,10 @@ export const claude: Provider = {
             }
 
             if (assistantEl) {
-                const text = (serializeNodeToMarkdown(assistantEl) || assistantEl.innerText || '').trim();
+                const contentEl = getResponseContent(assistantEl);
+                const text = (serializeNodeToMarkdown(contentEl) || contentEl.innerText || '').trim();
                 if (text) {
-                    const headings = Array.from(assistantEl.querySelectorAll('h1, h2, h3, h4')).map(h => ({
+                    const headings = Array.from(contentEl.querySelectorAll('h1, h2, h3, h4')).map(h => ({
                         innerText: (h as HTMLElement).innerText,
                         element: h as HTMLElement,
                         tagName: h.tagName
