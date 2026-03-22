@@ -1,6 +1,6 @@
 {
-  "name": "scroll-pro",
-  "version": "2.1.0",
+  "name": "scroll",
+  "version": "1.2.1",
   "description": "Navigate, copy, and export your AI chats.",
   "type": "module",
   "scripts": {

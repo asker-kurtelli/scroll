@@ -7,7 +7,7 @@ import { gemini } from '../providers/gemini';
 const PROVIDERS: Provider[] = [chatgpt, claude, gemini];
 
 const TURN_SELECTORS: Record<Provider['name'], string> = {
-    chatgpt: 'article[data-turn], article[data-testid^="conversation-turn"], [data-message-author-role]',
+    chatgpt: 'section[data-turn], section[data-testid^="conversation-turn"], article[data-turn], article[data-testid^="conversation-turn"], [data-message-author-role]',
     claude: '[data-testid="conversation-turn"], [data-testid="user-message"], [data-testid="assistant-response"], [data-testid="assistant-message"], .font-user-message, .font-claude-response',
     gemini: 'user-query, model-response'
 };

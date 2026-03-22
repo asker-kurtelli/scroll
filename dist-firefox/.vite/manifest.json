@@ -1,6 +1,6 @@
 {
   "../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-nzmbrLHr.js",
+    "file": "assets/crx-manifest.js-DyZ2CSta.js",
     "name": "crx-manifest.js",
     "src": "../../../@crx/manifest",
     "isEntry": true
@@ -10,7 +10,7 @@
     "src": "assets/whats-next.png"
   },
   "src/main.tsx": {
-    "file": "assets/main.tsx-BUu63HZC.js",
+    "file": "assets/main.tsx-CrjknqIn.js",
     "name": "main.tsx",
     "src": "src/main.tsx",
     "isEntry": true,

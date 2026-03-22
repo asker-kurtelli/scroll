@@ -4,9 +4,9 @@ import { serializeNodeToMarkdown } from '../lib/markdownUtil';
 export const chatgpt: Provider = {
     name: 'chatgpt',
     isMatch: () => window.location.hostname.includes('chatgpt') || window.location.hostname.includes('openai'),
-    scrollContainerSelector: 'main div[class*="overflow-y-auto"]',
+    scrollContainerSelector: 'main, main div[class*="overflow-y-auto"]',
     getTurns: (container: HTMLElement): Turn[] => {
-        const articleSelector = 'article[data-turn], article[data-testid^="conversation-turn"]';
+        const articleSelector = 'section[data-turn], section[data-testid^="conversation-turn"], article[data-turn], article[data-testid^="conversation-turn"]';
         let articles = Array.from(container.querySelectorAll<HTMLElement>(articleSelector));
         if (!articles.length) {
             articles = Array.from(document.querySelectorAll<HTMLElement>(articleSelector));
